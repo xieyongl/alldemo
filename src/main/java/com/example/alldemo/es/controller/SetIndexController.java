@@ -1,9 +1,8 @@
-package com.example.alldemo;
+package com.example.alldemo.es.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.example.alldemo.es.pojo.User;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -14,21 +13,28 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-@SpringBootTest
-class AlldemoApplicationTests {
+/**
+ * @description: TODO 新建索引
+ * @author: xieyong
+ * @date: 2022/1/7 17:50
+ **/
+@RestController
+@RequestMapping("/index")
+@Slf4j
+public class SetIndexController {
 
     @Autowired
     private RestHighLevelClient client;
 
-    @Test
-    void createIndex() {
+    @GetMapping("createIndex")
+    public void SetIndex() {
         CreateIndexRequest request = new CreateIndexRequest("company");
         try {
             CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
@@ -38,8 +44,8 @@ class AlldemoApplicationTests {
         }
     }
 
-    @Test
-    void getIndex() {
+    @GetMapping("getIndex")
+    public void getIndex() {
         GetIndexRequest request = new GetIndexRequest("animal");
         try {
             boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
@@ -50,9 +56,8 @@ class AlldemoApplicationTests {
     }
 
 
-    @Test
-    void createUserIndex() {
-//        User user = new User(1, "zhangsan", 22, "男");
+    @GetMapping("createUserIndex")
+    public void createUserIndex() {
         User user = new User(2,"测试", 22, "女");
 
         IndexRequest request = new IndexRequest("posts");
@@ -72,36 +77,4 @@ class AlldemoApplicationTests {
     }
 
 
-    @Test
-    void batchInset() {
-        //创建批量请求
-        BulkRequest bulkRequest = new BulkRequest();
-        //超时时间
-        bulkRequest.timeout("10s");
-        //模拟数据
-        ArrayList<User> users = new ArrayList<>();
-        users.add(new User(3,"张1",1, "男"));
-        users.add(new User(4,"张2",2, "男"));
-        users.add(new User(5,"张3",3, "男"));
-        users.add(new User(6,"张4",4,"男"));
-        int i=0 ;
-        //批量插入
-        for(User user:users){
-            bulkRequest.add(
-                    new IndexRequest("user")
-                            .id(""+i++)
-                            .source(JSON.toJSONString(user), XContentType.JSON)
-            );
-        }
-        try {
-            //发送请求
-            BulkResponse bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT);
-            //获取是否失败标志
-            System.out.println(bulk.hasFailures());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
 }
