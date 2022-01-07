@@ -7,6 +7,9 @@ spring:
     username: root
     password: 123456
 
+#  elasticsearch:
+#    cluster-name: myes
+#    cluster-nodes: 1.12.250.75:9200
 #  redis:
 #    database: 0 #数据库索引
 #    host: 127.0.0.1
