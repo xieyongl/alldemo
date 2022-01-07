@@ -1,0 +1,15 @@
+server:
+  servlet:
+    context-path: /alldemo
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+  profiles:
+    active: dev
+  application:
+    name: alldemo
+logging:
+  level:
+    ROOT: info

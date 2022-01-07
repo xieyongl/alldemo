@@ -1,0 +1,15 @@
+server:
+  port: 2333
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://1.12.250.75:3306/xy?characterEncoding=UTF-8&useUnicode=true&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+#  redis:
+#    database: 0 #数据库索引
+#    host: 127.0.0.1
+#    password: 123456
+#    port: 6379
+#  thymeleaf:
+#    cache: false
