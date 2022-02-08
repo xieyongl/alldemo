@@ -27,7 +27,7 @@ public class CallableResult {
         List<Future<String>> resultList = new ArrayList<Future<String>>();
 
         //创建10个任务并执行
-        for (int i = 0; i < 100000; i++){
+        for (int i = 0; i < 10; i++){
             //使用ExecutorService执行Callable类型的任务，并将结果保存在future变量中
             Future<String> future = executorService1.submit(new TaskWithResult(i));
             //将任务执行结果存储到List中
@@ -45,7 +45,7 @@ public class CallableResult {
                 e.printStackTrace();
             }finally{
                 //启动一次顺序关闭，执行以前提交的任务，但不接受新任务
-                executorService.shutdown();
+                executorService1.shutdown();
             }
         }
     }
