@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.alldemo.es.mapper.TrainingActivityContentMapper">
+
+    <resultMap id="contentMap" type="com.example.alldemo.es.pojo.TrainingActivityContent">
+        <id column="contentId" property="contentId"/>
+        <result column="title" property="title"/>
+        <result column="desc" property="desc"/>
+        <result column="trainingId" property="trainingId"/>
+        <result column="templateId" property="templateId"/>
+        <result column="templateName" property="templateName"/>
+        <result column="userId" property="userId"/>
+        <result column="level" property="level"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="createTime" property="createTime"/>
+        <result column="createdAt" property="createdAt"/>
+        <result column="updatedTime" property="updatedTime"/>
+        <result column="updatedAt" property="updatedAt"/>
+        <collection property="contentDetails" ofType="com.example.alldemo.es.pojo.TrainingActivityContentDetail">
+            <id column="detailId" property="detailId"/>
+            <result column="nodeName" property="nodeName"/>
+            <result column="nodeType" property="nodeType"/>
+            <result column="nodeContent" property="nodeContent"/>
+            <result column="nodeDesc" property="nodeDesc"/>
+            <result column="orderNo" property="orderNo"/>
+            <result column="content" property="content"/>
+        </collection>
+    </resultMap>
+
+    <select id="getContent" resultMap="contentMap">
+        select a.id contentId,
+            a.title,
+            a.`desc`,
+            a.training_id trainingId,
+            a.template_id templateId,
+            a.template_name templateName,
+            a.user_id userId,
+            a.`level`,
+            a.remark,
+            a.`status`,
+            a.create_time createTime,
+            a.created_at createdAt,
+            a.updated_time updatedTime,
+            a.updated_at updatedAt,
+            b.id detailId,
+            b.node_name nodeName,
+            b.node_type nodeType,
+            b.node_content nodeContent,
+            b.node_desc nodeDesc,
+            b.order_no orderNo,
+            b.content
+        from training_activity_content a
+        LEFT JOIN training_activity_content_detail b
+        on a.id = b.content_id
+        WHERE a.`status` = '0'
+        and a.deleted = '0'
+        and b.deleted = '0'
+--         and a.id = '1417371580355989505'
+    </select>
+</mapper>

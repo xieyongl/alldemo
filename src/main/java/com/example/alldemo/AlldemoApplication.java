@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 
-//@ComponentScan("com.example.alldemo.es.controller")
+@ComponentScan("com.example.alldemo.es.*")
 @SpringBootApplication
 public class AlldemoApplication {
 
