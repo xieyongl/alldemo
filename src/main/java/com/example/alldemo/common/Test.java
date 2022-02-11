@@ -7,24 +7,46 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author: xieyong
  * @date: 2022/2/9 11:35
  **/
-public class Test implements Runnable {
+public class Test {
 
-
-    @Override
-    public void run() {
-        AtomicInteger atomicInteger = new AtomicInteger();
-        // 加锁操作
-        System.out.println("hello");
-        atomicInteger.set(110);
-        for (int i=0; i<100; i++) {
-            atomicInteger.incrementAndGet();
-            System.out.println(atomicInteger.get());
-        }
-    }
 
     public static void main(String[] args) {
-        Test test = new Test();
-        Thread thread = new Thread(test);
-        thread.start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int count = 0;
+                for (int i = 100000; i <= 200000; i++) {
+                    boolean is=true;
+                    for (int j = 2; j < i; j++) {
+                        if (i%j==0){
+                            is=false;
+                            break;
+                        }
+                    }
+                    if (is)count++;
+                }
+                System.out.println(Thread.currentThread().getName()+":100000到200000之间有"+count+"个素数");
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                int count2 = 0;
+                for (int i = 2; i <= 100000; i++) {
+                    boolean is=true;
+                    for (int j = 2; j < i; j++) {
+                        if (i%j==0){
+                            is=false;
+                            break;
+                        }
+                    }
+                    if (is)count2++;
+                }
+                System.out.println(Thread.currentThread().getName()+":2到100000之间有"+count2+"个素数");
+            }
+        }).start();
     }
+
 }
