@@ -1,5 +1,7 @@
 package com.example.alldemo.thread.callable;
 
+import lombok.Synchronized;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
@@ -15,14 +17,15 @@ public class CallableResult {
 
     public static void main(String[] args) {
 
+
 //        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext(ExtConfig.class);
 
 
 //        ExecutorService executorService = Executors.newCachedThreadPool();
-        ExecutorService executorService = Executors.newFixedThreadPool(1000); //开启线程池
+        ExecutorService executorService = Executors.newFixedThreadPool(10); //开启线程池
 
         BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<>(20); //阻塞队列 这里意思是超过20个任务等待,就会执行拒绝策略（默认抛出异常？）
-        ExecutorService executorService1 = new ThreadPoolExecutor(1, 2,
+        ExecutorService executorService1 = new ThreadPoolExecutor(2, 4,
                 1, TimeUnit.SECONDS, workQueue, new ThreadPoolExecutor.AbortPolicy());
         List<Future<String>> resultList = new ArrayList<Future<String>>();
 
