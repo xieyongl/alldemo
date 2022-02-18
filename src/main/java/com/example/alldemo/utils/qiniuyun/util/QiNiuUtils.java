@@ -29,13 +29,13 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class QiNiuUtils {
-	@Value("${qiniu.file.accessKey}")
+//	@Value("${qiniu.file.accessKey}")
 	private String accessKey;
-	@Value("${qiniu.file.secretKey}")
+//	@Value("${qiniu.file.secretKey}")
 	private String secretKey;
-	@Value("${qiniu.file.bucket}")
+//	@Value("${qiniu.file.bucket}")
 	private String bucket;
-	@Value("${qiniu.file.cdnUrl}")
+//	@Value("${qiniu.file.cdnUrl}")
 	private String cdnUrl;
 
 	/**
