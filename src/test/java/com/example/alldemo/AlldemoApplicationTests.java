@@ -5,25 +5,35 @@ import com.example.alldemo.es.mapper.TrainingActivityContentMapper;
 import com.example.alldemo.es.pojo.TrainingActivityContent;
 import com.example.alldemo.es.pojo.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.CreateIndexResponse;
 import org.elasticsearch.client.indices.GetIndexRequest;
+import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.query.TermsQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,7 +52,7 @@ class AlldemoApplicationTests {
 
     @Test
     void createIndex() {
-        CreateIndexRequest request = new CreateIndexRequest("company");
+        CreateIndexRequest request = new CreateIndexRequest("food");
         try {
             CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
             System.out.println(createIndexResponse.index());
@@ -53,30 +63,55 @@ class AlldemoApplicationTests {
 
     @Test
     void getIndex() {
-        GetIndexRequest request = new GetIndexRequest("animal111");
+        GetIndexRequest request = new GetIndexRequest("user");
         try {
             boolean exists = client.indices().exists(request, RequestOptions.DEFAULT);
             System.out.println(exists);
+
+            GetIndexResponse response = client.indices().get(request, RequestOptions.DEFAULT);
+            System.out.println(response.getAliases()); //别名
+            System.out.println(response.getMappings()); //结构
+            System.out.println(response.getSettings()); //配置
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
 
+
+    //删除索引
+    @Test
+    void deleteIndex() {
+         DeleteIndexRequest deleteRequest = new DeleteIndexRequest("user02");
+        try {
+            AcknowledgedResponse response = client.indices().delete(deleteRequest, RequestOptions.DEFAULT);
+            System.out.println(response.isAcknowledged());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    //=================================[文档] ====================================
+
+
     @Test
     void createUserIndex() {
 //        User user = new User(1, "zhangsan", 22, "男");
-        User user = new User(2,"测试", 22, "女");
+        User user = new User(2,"111测试", 222222, "女");
 
-        IndexRequest request = new IndexRequest("posts");
-        request.id("1");
+        IndexRequest request = new IndexRequest("user02"); //确定是哪个索引
+        request.id("666"); //为插入数据指定id
         //对象转为json
         request.source(JSON.toJSON(user), XContentType.JSON);
         try {
             //发送
             IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
+            System.out.println(indexResponse.getResult());
+
+
             //获取索引内容看看
-            GetRequest getRequest = new GetRequest("posts","2");
+            GetRequest getRequest = new GetRequest("user02","4");
             GetResponse getResponse = client.get(getRequest, RequestOptions.DEFAULT);
             System.out.println(getResponse);
         } catch (IOException e) {
@@ -101,11 +136,34 @@ class AlldemoApplicationTests {
         //批量插入
         for(User user:users){
             bulkRequest.add(
-                    new IndexRequest("user")
+                    new IndexRequest("user02")
                             .id(""+i++)
                             .source(JSON.toJSONString(user), XContentType.JSON)
             );
         }
+        try {
+            //发送请求
+            BulkResponse bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT);
+            //获取是否失败标志
+            System.out.println(bulk.hasFailures());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    //批量删除
+    @Test
+    void batchDelete() {
+        //创建批量请求
+        BulkRequest bulkRequest = new BulkRequest();
+        //超时时间
+        bulkRequest.timeout("10s");
+
+        bulkRequest.add(new DeleteRequest().index("user02").id("1"));
+        bulkRequest.add(new DeleteRequest().index("user02").id("2"));
+        bulkRequest.add(new DeleteRequest().index("user02").id("3"));
+        bulkRequest.add(new DeleteRequest().index("user02").id("0"));
+
         try {
             //发送请求
             BulkResponse bulk = client.bulk(bulkRequest, RequestOptions.DEFAULT);
@@ -210,6 +268,215 @@ class AlldemoApplicationTests {
 
     }
 
+
+
+    //===============================【高级操作】====================================
+
+    //查询索引中全部数据
+    @Test
+    public void query() throws IOException{
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
+
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
+
+
+    //条件查询
+    @Test
+    public void conditionQuery() throws IOException{
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        /**
+         * 查询昵称 nick_name 为 XX 的数据
+         */
+        searchRequest.source(new SearchSourceBuilder().query(QueryBuilders.termQuery("nick_name","ツ")));
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
+
+
+    //分页查询
+    @Test
+    public void pagingQuery() throws IOException{
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        SearchSourceBuilder builder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
+
+        /**
+         * 从0开始 每页4条数据
+         */
+        builder.from(0);
+        builder.size(4);
+
+        //查询昵称
+        searchRequest.source(builder);
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
+
+
+
+    //查询结果排序显示
+    @Test
+    public void sort() throws IOException{
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        SearchSourceBuilder builder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
+
+        /**
+         * 按照查询结果中id字段降序排序
+         */
+        builder.sort("id", SortOrder.DESC);
+
+        //查询昵称
+        searchRequest.source(builder);
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
+
+
+    //过滤查询字段
+    @Test
+    public void filterFields() throws IOException{
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        SearchSourceBuilder builder = new SearchSourceBuilder().query(QueryBuilders.matchAllQuery());
+
+        /**
+         * 筛选字段去查询数据
+         */
+        String[] excludes = {}; //排除字段
+        String[] includes = {"id", "nick_name", "gender"}; //包含字段
+        builder.fetchSource(includes, excludes);
+        builder.sort("id", SortOrder.DESC); //排序
+
+        //查询昵称
+        searchRequest.source(builder);
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
+
+
+
+
+
+
+
+
+    //组合查询
+    @Test
+    public void groupQuery() throws IOException{
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
+
+        /**
+         * 条件组合
+         */
+        boolQueryBuilder.must(QueryBuilders.matchQuery("gender", "1"));
+        boolQueryBuilder.must(QueryBuilders.matchQuery("nick_name", "ツ"));
+
+        builder.query(boolQueryBuilder);
+
+
+        //查询昵称
+        searchRequest.source(builder);
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
+
+
+    //高亮查询
+    @Test
+    public void hightLightQuery() throws IOException{
+
+        SearchRequest searchRequest = new SearchRequest();
+        searchRequest.indices("user");
+
+        SearchSourceBuilder builder = new SearchSourceBuilder();
+        /**
+         * 高亮组合
+         */
+        TermsQueryBuilder termsQueryBuilder = QueryBuilders.termsQuery("gender", "1");
+        HighlightBuilder highlightBuilder = new HighlightBuilder();
+        //插入高亮标签
+        highlightBuilder.preTags("<font color='red'>");
+        highlightBuilder.postTags("</font>");
+        highlightBuilder.field("gender");
+        builder.highlighter(highlightBuilder);
+
+
+        String[] excludes = {}; //排除字段
+        String[] includes = {"id", "nick_name", "gender"}; //包含字段
+        builder.fetchSource(includes, excludes);
+
+
+        builder.query(termsQueryBuilder);
+
+        //查询昵称
+        searchRequest.source(builder);
+        SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+
+        SearchHits searchHits = response.getHits(); //获取查询结果
+        System.out.println(searchHits.getTotalHits()); //查询条数
+        System.out.println(response.getTook()); //查询时间
+        //查询的具体数据
+        for (SearchHit searchHit : searchHits) {
+            System.out.println(searchHit.getSourceAsString() );
+        }
+    }
 
 
 }

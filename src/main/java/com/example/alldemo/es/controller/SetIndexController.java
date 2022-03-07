@@ -6,12 +6,14 @@ import com.example.alldemo.es.pojo.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.support.master.AcknowledgedResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.CreateIndexRequest;
@@ -24,6 +26,7 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -32,7 +35,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * @description: TODO 新建索引
+ * @description: TODO  ES增删改查常规操作
  * @author: xieyong
  * @date: 2022/1/7 17:50
  **/
@@ -72,6 +75,17 @@ public class SetIndexController {
         }
     }
 
+    //删除索引
+    @DeleteMapping("indexName")
+    public void deleteIndex(String indexName) {
+        DeleteIndexRequest deleteRequest = new DeleteIndexRequest("user02");
+        try {
+            AcknowledgedResponse response = client.indices().delete(deleteRequest, RequestOptions.DEFAULT);
+            System.out.println(response.isAcknowledged());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     //创建用户索引
     @GetMapping("createUserIndex")
