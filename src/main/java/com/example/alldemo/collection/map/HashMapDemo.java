@@ -1,6 +1,10 @@
 package com.example.alldemo.collection.map;
 
+import com.google.common.collect.Lists;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -20,6 +24,9 @@ public class HashMapDemo {
         hashMap.put("a", "aaa");
         hashMap.put("b", "bbb");
         System.out.println(hashMap.get("a"));
+
+        List list = new ArrayList();
+//        Lists.partition();
 
     }
 }

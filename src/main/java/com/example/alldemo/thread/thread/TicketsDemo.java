@@ -1,5 +1,6 @@
 package com.example.alldemo.thread.thread;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
@@ -84,6 +85,18 @@ class Tickets implements Runnable {
                 lock.unlock();
             }
         }
+    }
+
+    public static void main(String[] args) {
+        CountDownLatch cdl = new CountDownLatch(6);
+        for(int i=0;i<2;i++){
+            new Thread(()->{
+                System.out.println(Thread.currentThread().getName()+",同学离开教室！");
+                //开始减数1
+                cdl.countDown();
+            },String.valueOf(i).toString()).start();
+        }
+
     }
 }
 
