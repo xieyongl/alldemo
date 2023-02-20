@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 public class SemaphoreDemo {
 
     /**
-     * 原理:
+     * //TODO 原理:
      * semaphore.acquire(); //获取信号量,假设如果已经满了,等待信号量可用时被唤醒
      * semaphore.release(); //释放信号量
      * 作用: 多个共享资源互斥的使用!并发限流,控制最大的线程数
