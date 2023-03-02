@@ -1,6 +1,8 @@
 package com.example.alldemo.utils.regularmatchUtil;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,13 +14,14 @@ public class StringRegularMatchUtil {
 
     public static void main(String[] args) {
 
+
         Map<String, String> map = new HashMap<>();
         map.put("distributeCode", "替换值1");
         map.put("qudaoCode", "替换值2");
 
-        String baseString = "sub/zero/trans/index?page_name=material&distributeCode=${distributeCode}&qudaoCode=${qudaoCode}";
-        if (baseString.contains("$")) {
-            String patternString = "\\$\\{(.+?)}";
+        String baseString = "sub/zero/trans/index?page_name=material&distributeCode={distributeCode}&qudaoCode={qudaoCode}";
+        if (baseString.contains("{")) {
+            String patternString = "\\{(.+?)}";
             //构建一个匹配模式(模板) 一个匹配模式就是一个对象
             Pattern pattern = Pattern.compile(patternString);
             //根据匹配模板构建一个 匹配器
