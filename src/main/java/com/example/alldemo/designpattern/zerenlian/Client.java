@@ -15,7 +15,7 @@ public class Client {
         groupLeader.setNextHandler(departmentLeader);
         departmentLeader.setNextHandler(boss);
 
-        return boss;
+        return groupLeader;
     }
     public static void main(String[] args) {
 
