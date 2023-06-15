@@ -1,5 +1,11 @@
 package com.example.alldemo.designpattern.gongchang.chouxiang;
 
+import com.example.alldemo.designpattern.gongchang.chouxiang.boluo.BoFactory;
+import com.example.alldemo.designpattern.gongchang.chouxiang.factory.IFactory;
+import com.example.alldemo.designpattern.gongchang.chouxiang.factory.product.Computer;
+import com.example.alldemo.designpattern.gongchang.chouxiang.factory.product.Phone;
+import com.example.alldemo.designpattern.gongchang.chouxiang.lizi.LiFactory;
+
 public class Client {
     public static void main(String[] args) {
 

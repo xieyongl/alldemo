@@ -1,9 +1,9 @@
 package com.example.alldemo.utils.dateUtil.localdatetime;
 
+import cn.hutool.core.date.DatePattern;
+
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
@@ -15,6 +15,7 @@ public class LocalDateTimeDemo01 {
     public static void main(String[] args) {
 
         System.out.println("当前时间：" + LocalDateTime.now());
+        System.out.println("当前时间：" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss")));
 
         LocalDateTime localDateTime = LocalDateTime.of(2023, 03, 9, 14, 15, 33);
         System.out.println("指定时间：" + localDateTime);
@@ -44,6 +45,16 @@ public class LocalDateTimeDemo01 {
         //使用特定格式化形式将LocalDateTime转为字符串
         String ldt4 = df1.format(ldt3);
         System.out.println(ldt4);
+
+
+        System.out.println("-----------------------------------------------------");
+        System.out.println("LocalDateTime与 LocalDate、 LocalTime之间的转换: ");
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate nowDate = now.toLocalDate();
+        LocalTime nowTime = now.toLocalTime();
+        System.out.println(now + " 转换之后分别是：" + nowDate  + "、和" + nowTime);
+
+
 
         System.out.println("-----------------------------------------------------");
         System.out.println("LocalDateTime与 Date 之间的转换: ");
