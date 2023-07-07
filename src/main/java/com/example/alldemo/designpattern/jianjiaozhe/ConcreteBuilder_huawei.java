@@ -1,6 +1,10 @@
 package com.example.alldemo.designpattern.jianjiaozhe;
 
+import lombok.experimental.SuperBuilder;
+
 public class ConcreteBuilder_huawei extends Builder{
+
+    private Product product;
 
     @Override
     public void buildCpu() {
